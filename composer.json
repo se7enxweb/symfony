@@ -1,5 +1,5 @@
 {
-    "name": "symfony/symfony",
+    "name": "se7enxweb/symfony",
     "type": "library",
     "description": "The Symfony PHP framework",
     "keywords": ["framework"],
