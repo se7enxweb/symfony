@@ -298,6 +298,12 @@ class ArrayNode extends BaseNode implements PrototypeNodeInterface
             }
         }
 
+	// 7x : eZ Platform Related Patch : 2025.08
+	// Note: This should be improved in the future
+	if ( implode(', ', array_keys($value)) == 'servers' or
+             implode(', ', array_keys($value)) == 'header' )
+	    $this->ignoreExtraKeys = true;
+
         // if extra fields are present, throw exception
         if (\count($value) && !$this->ignoreExtraKeys) {
             $ex = new InvalidConfigurationException(sprintf('Unrecognized option%s "%s" under "%s"', 1 === \count($value) ? '' : 's', implode(', ', array_keys($value)), $this->getPath()));
