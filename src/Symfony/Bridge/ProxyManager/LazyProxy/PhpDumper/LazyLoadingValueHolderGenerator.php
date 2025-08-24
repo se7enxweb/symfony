@@ -12,7 +12,7 @@
 namespace Symfony\Bridge\ProxyManager\LazyProxy\PhpDumper;
 
 use ProxyManager\ProxyGenerator\LazyLoadingValueHolderGenerator as BaseGenerator;
-use Zend\Code\Generator\ClassGenerator;
+use Laminas\Code\Generator\ClassGenerator;
 
 /**
  * @internal
