@@ -48,12 +48,13 @@ use Symfony\Component\Debug\FatalErrorHandler\UndefinedMethodFatalErrorHandler;
  */
 class ErrorHandler
 {
+
+    // 7x : eZ Platform Related Patch : 2025.08
     private $levels = [
         \E_DEPRECATED => 'Deprecated',
         \E_USER_DEPRECATED => 'User Deprecated',
         \E_NOTICE => 'Notice',
         \E_USER_NOTICE => 'User Notice',
-        \E_STRICT => 'Runtime Notice',
         \E_WARNING => 'Warning',
         \E_USER_WARNING => 'User Warning',
         \E_COMPILE_WARNING => 'Compile Warning',
@@ -71,7 +72,6 @@ class ErrorHandler
         \E_USER_DEPRECATED => [null, LogLevel::INFO],
         \E_NOTICE => [null, LogLevel::WARNING],
         \E_USER_NOTICE => [null, LogLevel::WARNING],
-        \E_STRICT => [null, LogLevel::WARNING],
         \E_WARNING => [null, LogLevel::WARNING],
         \E_USER_WARNING => [null, LogLevel::WARNING],
         \E_COMPILE_WARNING => [null, LogLevel::WARNING],
@@ -159,7 +159,7 @@ class ErrorHandler
         return $handler;
     }
 
-    public function __construct(BufferingLogger $bootstrappingLogger = null)
+    public function __construct(?BufferingLogger $bootstrappingLogger = null)
     {
         if ($bootstrappingLogger) {
             $this->bootstrappingLogger = $bootstrappingLogger;
@@ -261,7 +261,7 @@ class ErrorHandler
      *
      * @return callable|null The previous exception handler
      */
-    public function setExceptionHandler(callable $handler = null)
+    public function setExceptionHandler(?callable $handler = null)
     {
         $prev = $this->exceptionHandler;
         $this->exceptionHandler = $handler;
@@ -550,7 +550,7 @@ class ErrorHandler
      *
      * @internal
      */
-    public function handleException($exception, array $error = null)
+    public function handleException($exception, ?array $error = null)
     {
         if (null === $error) {
             self::$exitCode = 255;
