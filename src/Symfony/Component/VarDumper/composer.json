@@ -1,8 +1,8 @@
 {
-    "name": "symfony/var-dumper",
+    "name": "se7enxweb/symfony-var-dumper",
     "type": "library",
     "description": "Symfony mechanism for exploring and dumping PHP variables",
-    "keywords": ["dump", "debug"],
+    "keywords": ["dump", "debug", "ezplatform" ],
     "homepage": "https://symfony.com",
     "license": "MIT",
     "authors": [
