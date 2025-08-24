@@ -84,8 +84,11 @@
         "symfony/web-profiler-bundle": "self.version",
         "symfony/web-server-bundle": "self.version",
         "symfony/workflow": "self.version",
-        "symfony/yaml": "self.version"
-    },
+        "symfony/yaml": "self.version",
+        "symfony/symfony": "3.4.*",
+        "symfony/framework-bundle": "3.4.*",
+        "symfony/yaml": "3.4.*"
+    }
     "require-dev": {
         "cache/integration-tests": "dev-master",
         "doctrine/annotations": "~1.0",
