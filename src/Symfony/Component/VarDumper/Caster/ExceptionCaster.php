@@ -24,6 +24,7 @@ class ExceptionCaster
 {
     public static $srcContext = 1;
     public static $traceArgs = true;
+    // 7x : eZ Platform Related Patch : 2025.08
     public static $errorTypes = [
         \E_DEPRECATED => 'E_DEPRECATED',
         \E_USER_DEPRECATED => 'E_USER_DEPRECATED',
@@ -39,7 +40,6 @@ class ExceptionCaster
         \E_USER_ERROR => 'E_USER_ERROR',
         \E_USER_WARNING => 'E_USER_WARNING',
         \E_USER_NOTICE => 'E_USER_NOTICE',
-        \E_STRICT => 'E_STRICT',
     ];
 
     private static $framesCache = [];
