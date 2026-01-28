@@ -106,12 +106,12 @@ class Data implements \ArrayAccess, \Countable, \IteratorAggregate
         return $children;
     }
 
-    public function count()
+    public function count(): int
     {
         return \count($this->getValue());
     }
 
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         if (!\is_array($value = $this->getValue())) {
             throw new \LogicException(sprintf('"%s" object holds non-iterable type "%s".', self::class, \gettype($value)));
@@ -138,22 +138,22 @@ class Data implements \ArrayAccess, \Countable, \IteratorAggregate
         return null !== $this->seek($key);
     }
 
-    public function offsetExists($key)
+    public function offsetExists($key): bool
     {
         return $this->__isset($key);
     }
 
-    public function offsetGet($key)
+    public function offsetGet($key): mixed
     {
         return $this->__get($key);
     }
 
-    public function offsetSet($key, $value)
+    public function offsetSet($key, $value): void
     {
         throw new \BadMethodCallException(self::class.' objects are immutable.');
     }
 
-    public function offsetUnset($key)
+    public function offsetUnset($key): void
     {
         throw new \BadMethodCallException(self::class.' objects are immutable.');
     }
