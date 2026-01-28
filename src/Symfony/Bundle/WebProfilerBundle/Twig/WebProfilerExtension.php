@@ -69,14 +69,15 @@ class WebProfilerExtension extends ProfilerExtension
      */
     public function getFunctions()
     {
-        $profilerDump = function (Environment $env, $value, $maxDepth = 0) {
-            return $value instanceof Data ? $this->dumpData($env, $value, $maxDepth) : twig_escape_filter($env, $this->dumpValue($value));
-        };
-
         return [
-            new TwigFunction('profiler_dump', $profilerDump, ['is_safe' => ['html'], 'needs_environment' => true]),
+            new TwigFunction('profiler_dump', [$this, 'profilerDump'], ['is_safe' => ['html'], 'needs_environment' => true]),
             new TwigFunction('profiler_dump_log', [$this, 'dumpLog'], ['is_safe' => ['html'], 'needs_environment' => true]),
         ];
+    }
+
+    public function profilerDump(Environment $env, $value, $maxDepth = 0)
+    {
+        return $value instanceof Data ? $this->dumpData($env, $value, $maxDepth) : twig_escape_filter($env, $this->dumpValue($value));
     }
 
     public function dumpData(Environment $env, Data $data, $maxDepth = 0)
