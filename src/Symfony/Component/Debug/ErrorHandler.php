@@ -112,7 +112,7 @@ class ErrorHandler
      *
      * @return self The registered error handler
      */
-    public static function register(self $handler = null, $replace = true)
+    public static function register(?self $handler = null, bool $replace = true)
     {
         if (null === self::$reservedMemory) {
             self::$reservedMemory = str_repeat('x', 10240);
@@ -166,7 +166,13 @@ class ErrorHandler
             $this->setDefaultLogger($bootstrappingLogger);
         }
         $this->traceReflector = new \ReflectionProperty('Exception', 'trace');
-        $this->traceReflector->setAccessible(true);
+        // PHP 8.1+: setAccessible is deprecated and has no effect
+        if (method_exists($this->traceReflector, 'setAccessible')) {
+            // Only call if not PHP 8.1+
+            if (PHP_VERSION_ID < 80100) {
+                $this->traceReflector->setAccessible(true);
+            }
+        }
     }
 
     /**
@@ -620,7 +626,7 @@ class ErrorHandler
      *
      * @internal
      */
-    public static function handleFatalError(array $error = null)
+    public static function handleFatalError(?array $error = null)
     {
         if (null === self::$reservedMemory) {
             return;
