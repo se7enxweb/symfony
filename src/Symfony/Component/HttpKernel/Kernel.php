@@ -602,7 +602,11 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
             return;
         }
 
-        if ($collectDeprecations = $this->debug && !\defined('PHPUNIT_COMPOSER_INSTALL')) {
+        // Suppress deprecation collection for performance (disable file_put_contents on every request)
+        // Set environment variable SYMFONY_COLLECT_DEPRECATIONS=1 to enable deprecation logging
+        $collectDeprecations = $this->debug && !\defined('PHPUNIT_COMPOSER_INSTALL') && getenv('SYMFONY_COLLECT_DEPRECATIONS') === '1';
+        
+        if ($collectDeprecations) {
             $collectedLogs = [];
             $previousHandler = set_error_handler(function ($type, $message, $file, $line) use (&$collectedLogs, &$previousHandler) {
                 if (\E_USER_DEPRECATED !== $type && \E_DEPRECATED !== $type) {
@@ -645,7 +649,10 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
             if ($collectDeprecations) {
                 restore_error_handler();
 
-                file_put_contents($cacheDir.'/'.$class.'Deprecations.log', serialize(array_values($collectedLogs)));
+                // Write deprecation logs only if collection is enabled (disabled by default for performance)
+                if ($collectDeprecations) {
+                    file_put_contents($cacheDir.'/'.$class.'Deprecations.log', serialize(array_values($collectedLogs)));
+                }
                 file_put_contents($cacheDir.'/'.$class.'Compiler.log', null !== $container ? implode("\n", $container->getCompiler()->getLog()) : '');
             }
         }

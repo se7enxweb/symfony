@@ -20,16 +20,32 @@ use Symfony\Component\VarDumper\Cloner\VarCloner;
 class VarDumperFormatter implements FormatterInterface
 {
     private $cloner;
+    private $clonerError = false;
 
-    public function __construct(VarCloner $cloner = null)
+    public function __construct(?VarCloner $cloner = null)
     {
-        $this->cloner = $cloner ?: new VarCloner();
+        try {
+            $this->cloner = $cloner ?: new VarCloner();
+        } catch (\Throwable $e) {
+            // VarCloner might not be loadable during error handling
+            $this->clonerError = true;
+            $this->cloner = null;
+        }
     }
 
     public function format(array $record)
     {
-        $record['context'] = $this->cloner->cloneVar($record['context']);
-        $record['extra'] = $this->cloner->cloneVar($record['extra']);
+        // If cloner initialization failed, skip var dumping
+        if ($this->clonerError || !$this->cloner) {
+            return $record;
+        }
+
+        try {
+            $record['context'] = $this->cloner->cloneVar($record['context']);
+            $record['extra'] = $this->cloner->cloneVar($record['extra']);
+        } catch (\Throwable $e) {
+            // Fallback if cloning fails
+        }
 
         return $record;
     }

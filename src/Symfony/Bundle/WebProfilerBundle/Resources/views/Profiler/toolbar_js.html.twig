@@ -22,7 +22,14 @@
                 var i, scripts = [].slice.call(el.querySelectorAll('script'));
 
                 for (i = 0; i < scripts.length; ++i) {
-                    eval(scripts[i].firstChild.nodeValue);
+                    try {
+                        var scriptNode = scripts[i].firstChild;
+                        if (scriptNode && scriptNode.nodeType === 3 && scriptNode.nodeValue) {
+                            eval(scriptNode.nodeValue);
+                        }
+                    } catch (e) {
+                        console.warn('Toolbar script error:', e);
+                    }
                 }
 
                 el.style.display = -1 !== xhr.responseText.indexOf('sf-toolbarreset') ? 'block' : 'none';

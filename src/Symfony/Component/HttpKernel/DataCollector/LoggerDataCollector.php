@@ -64,7 +64,14 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
     public function lateCollect()
     {
         if (null !== $this->logger) {
-            $containerDeprecationLogs = $this->getContainerDeprecationLogs();
+            // Skip container deprecations to reduce Profiler log noise (1200+ entries)
+            // Runtime deprecations are still logged via php_errors.log: false setting
+            // Skip reading deprecation logs if SYMFONY_COLLECT_DEPRECATIONS is not enabled (performance optimization)
+            if (!$this->shouldCollectDeprecations()) {
+                $containerDeprecationLogs = [];
+            } else {
+                $containerDeprecationLogs = $this->getContainerDeprecationLogs();
+            }
             $this->data = $this->computeErrorsCount($containerDeprecationLogs);
             $this->data['compiler_logs'] = $this->getContainerCompilerLogs();
             $this->data['logs'] = $this->sanitizeLogs(array_merge($this->logger->getLogs(), $containerDeprecationLogs));
@@ -89,6 +96,10 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
 
     public function countDeprecations()
     {
+        // Return 0 if deprecation collection is not enabled via env variable
+        if (!$this->shouldCollectDeprecations()) {
+            return 0;
+        }
         return isset($this->data['deprecation_count']) ? $this->data['deprecation_count'] : 0;
     }
 
@@ -115,8 +126,23 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
         return 'logger';
     }
 
+    /**
+     * Determines if deprecations should be collected based on SYMFONY_COLLECT_DEPRECATIONS env variable.
+     *
+     * @return bool
+     */
+    private function shouldCollectDeprecations()
+    {
+        return getenv('SYMFONY_COLLECT_DEPRECATIONS') === '1';
+    }
+
     private function getContainerDeprecationLogs()
     {
+        // Skip reading deprecation logs if SYMFONY_COLLECT_DEPRECATIONS is not enabled (performance optimization)
+        if (!$this->shouldCollectDeprecations()) {
+            return [];
+        }
+
         if (null === $this->containerPathPrefix || !file_exists($file = $this->containerPathPrefix.'Deprecations.log')) {
             return [];
         }
@@ -166,6 +192,11 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
         $silencedLogs = [];
 
         foreach ($logs as $log) {
+            // If deprecation collection is not enabled, skip all deprecation logs
+            if (!$this->shouldCollectDeprecations() && $this->isSilencedOrDeprecationErrorLog($log)) {
+                continue;
+            }
+
             if (!$this->isSilencedOrDeprecationErrorLog($log)) {
                 $sanitizedLogs[] = $log;
 
@@ -233,7 +264,7 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
         $silencedLogs = [];
         $count = [
             'error_count' => $this->logger->countErrors(),
-            'deprecation_count' => 0,
+            'deprecation_count' => 0,  // Always initialized, but zeroed if suppressed
             'warning_count' => 0,
             'scream_count' => 0,
             'priorities' => [],
@@ -252,6 +283,11 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
                 ++$count['warning_count'];
             }
 
+            // Skip deprecation calculation if SYMFONY_COLLECT_DEPRECATIONS is not enabled
+            if (!$this->shouldCollectDeprecations()) {
+                continue;
+            }
+
             if ($this->isSilencedOrDeprecationErrorLog($log)) {
                 $exception = $log['context']['exception'];
                 if ($exception instanceof SilencedErrorContext) {
@@ -266,8 +302,11 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
             }
         }
 
-        foreach ($containerDeprecationLogs as $deprecationLog) {
-            $count['deprecation_count'] += $deprecationLog['context']['exception']->count;
+        // Skip container deprecation logs if SYMFONY_COLLECT_DEPRECATIONS is not enabled
+        if ($this->shouldCollectDeprecations()) {
+            foreach ($containerDeprecationLogs as $deprecationLog) {
+                $count['deprecation_count'] += $deprecationLog['context']['exception']->count;
+            }
         }
 
         ksort($count['priorities']);
