@@ -341,6 +341,11 @@ class DebugClassLoader
                 throw new \RuntimeException(sprintf('Trying to autoload a class with an invalid name "%s". Be careful that the namespace separator is "\" in PHP, not "/".', $class));
             }
 
+            // Skip compat shim files that just trigger autoloading of a renamed class via class_exists()
+            if (false !== strpos(@file_get_contents($file), 'class_exists(')) {
+                return;
+            }
+
             throw new \RuntimeException(sprintf('The autoloader expected class "%s" to be defined in file "%s". The file was found but the class was not in it, the class name or namespace probably has a typo.', $class, $file));
         }
 
