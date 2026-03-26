@@ -133,7 +133,7 @@ class DebugClassLoader
         $this->patchTypes += [
             'force' => null,
             'php' => \PHP_MAJOR_VERSION.'.'.\PHP_MINOR_VERSION,
-            'deprecations' => \PHP_VERSION_ID >= 70400,
+            'deprecations' => false,
         ];
 
         if ('phpdoc' === $this->patchTypes['force']) {
