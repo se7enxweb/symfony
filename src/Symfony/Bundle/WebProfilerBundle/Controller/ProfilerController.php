@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\WebProfilerBundle\Controller;
 
-use Symfony\Bundle\FullStack;
 use Symfony\Bundle\WebProfilerBundle\Csp\ContentSecurityPolicyHandler;
 use Symfony\Bundle\WebProfilerBundle\Profiler\TemplateManager;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -153,7 +152,7 @@ class ProfilerController
         }
 
         return $this->renderWithCspNonces($request, '@WebProfiler/Profiler/toolbar.html.twig', [
-            'full_stack' => class_exists(FullStack::class),
+            'full_stack' => false,
             'request' => $request,
             'profile' => $profile,
             'templates' => $this->getTemplateManager()->getNames($profile),
