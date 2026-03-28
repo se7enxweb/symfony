@@ -297,12 +297,15 @@ class Command
         } else {
             $statusCode = $this->execute($input, $output);
 
-            if (!\is_int($statusCode)) {
+            if (null === $statusCode) {
+                // BC: treat null return from execute() as success (0) for legacy commands that predate the int-return requirement
+                $statusCode = 0;
+            } elseif (!\is_int($statusCode)) {
                 throw new \TypeError(sprintf('Return value of "%s::execute()" must be of the type int, "%s" returned.', static::class, get_debug_type($statusCode)));
             }
         }
 
-        return is_numeric($statusCode) ? (int) $statusCode : 0;
+        return (int) $statusCode;
     }
 
     /**
