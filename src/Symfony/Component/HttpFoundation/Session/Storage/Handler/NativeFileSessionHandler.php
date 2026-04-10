@@ -49,7 +49,12 @@ class NativeFileSessionHandler extends NativeSessionHandler
             throw new \RuntimeException(sprintf('Session Storage was not able to create directory "%s".', $baseDir));
         }
 
-        ini_set('session.save_path', $savePath);
-        ini_set('session.save_handler', 'files');
+        // PHP 8.1+ raises a warning (converted to exception by Symfony's error handler) when
+        // session ini settings are changed after the session has already started or after output
+        // has been sent (e.g. when the legacy kernel runs during a CLI command like cache:clear).
+        if (\PHP_SESSION_ACTIVE !== session_status() && !headers_sent()) {
+            ini_set('session.save_path', $savePath);
+            ini_set('session.save_handler', 'files');
+        }
     }
 }
